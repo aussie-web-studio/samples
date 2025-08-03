@@ -8,6 +8,10 @@ Here is what we are building:
 
 ## Running the Recipe Bot
 
+pyenv virtualenv simple-observability
+pyenv local simple-observability
+pyenv activate simple-observability
+
 1. Navigate to this directory: `cd /02-simple-interactive-usecase/`
 2. Install dependencies: `pip install -r requirements.txt`
 3. Run the bot: `python recipe_bot.py`

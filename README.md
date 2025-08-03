@@ -51,6 +51,9 @@ The examples in this repository are for **demonstration and educational purposes
 ### Step 1: Install Required Packages
 
 ```bash
+pyenv virtualenv 13.3.5 my_venv
+pyenv local my_venv
+pyenv activate my_venv
 pip install strands-agents
 pip install strands-agents-tools
 ```
