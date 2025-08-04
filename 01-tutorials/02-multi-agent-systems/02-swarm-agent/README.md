@@ -17,6 +17,22 @@ Here's an example of a swarm :
 - **Collective intelligence** through shared context
 - **Multi-modal input support** for handling text, images, and other content types
 
+## Setting up the virtual environment
+
+pyenv install 3.12.10 # Install python version to use for this project
+
+pyenv local 3.12.10 # Set the python version for this project
+
+pyenv exec python -m venv .swarm-agent
+
+.\.swarm-agent\Scripts\activate
+
+pip install -r requirements.txt
+
+python swarm-agent.py
+
+deactivate
+
 ## Creating a Swarm
 
 To create a Swarm, you need to define a collection of agents with different specializations:

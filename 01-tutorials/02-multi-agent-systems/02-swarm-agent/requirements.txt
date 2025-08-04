@@ -1,2 +1,9 @@
 strands-agents
 strands-agents-tools
+arize-otel
+arize-toolkit
+strands-agents[openai]
+arize-otel 
+openinference-instrumentation-openai 
+opentelemetry-exporter-otlp
+python-dotenv

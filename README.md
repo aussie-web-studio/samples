@@ -48,7 +48,7 @@ The examples in this repository are for **demonstration and educational purposes
 
 ## 🏁 Getting Started
 
-### Step 1: Install Required Packages
+### Step 1.1 : Install Required Packages on MAC
 
 ```bash
 pyenv virtualenv 13.3.5 my_venv
@@ -56,6 +56,24 @@ pyenv local my_venv
 pyenv activate my_venv
 pip install strands-agents
 pip install strands-agents-tools
+```
+
+### Step 1.2 : Install Required Packages on Windows
+
+```bash
+pyenv install 3.12.10 # Install python version to use for this project
+
+pyenv local 3.12.10 # Set the python version for this project
+
+pyenv exec python -m venv .swarm-agent
+
+.\.swarm-agent\Scripts\activate
+
+pip install -r requirements.txt
+
+python swarm-agent.py
+
+deactivate
 ```
 
 ### Step 2: Setup Model Provider
