@@ -1,0 +1,42 @@
+
+[2025-08-07T15:31:39.467543] Python REPL Error:
+Code:
+import plotly.graph_objects as go
+
+# Data for the bar graph
+services = ['Amazon Bedrock', 'AWS Lambda', 'OpenSearch Service', 'RDS', 'SageMaker']
+costs = [453.60, 31.82, 7.265, 3.13, 1.56] # Averaged cost per day
+
+# Create a bar graph
+fig = go.Figure(data=[go.Bar(name='Cost per Service', x=services, y=costs)])
+fig.update_layout(title_text='AWS Service Cost Breakdown per Day')
+fig.show()
+Error:
+Traceback (most recent call last):
+  File "/Users/andypham/Coding/Strands/samples/02-samples/03-aws-assistant-mcp-dev/.venv/lib/python3.13/site-packages/strands_tools/python_repl.py", line 594, in python_repl
+    user_input = get_user_input(
+        "<yellow><bold>Do you want to proceed with Python code execution?</bold> [y/*]</yellow>"
+    )
+  File "/Users/andypham/Coding/Strands/samples/02-samples/03-aws-assistant-mcp-dev/.venv/lib/python3.13/site-packages/strands_tools/utils/user_input.py", line 70, in get_user_input
+    result = loop.run_until_complete(get_user_input_async(prompt, default, keyboard_interrupt_return_default))
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Users/andypham/Coding/Strands/samples/02-samples/03-aws-assistant-mcp-dev/.venv/lib/python3.13/site-packages/strands_tools/utils/user_input.py", line 44, in get_user_input_async
+    return await _get_input()
+           ^^^^^^^^^^^^^^^^^^
+  File "/Users/andypham/Coding/Strands/samples/02-samples/03-aws-assistant-mcp-dev/.venv/lib/python3.13/site-packages/strands_tools/utils/user_input.py", line 35, in _get_input
+    response = await session.prompt_async(HTML(f"{prompt} "))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andypham/Coding/Strands/samples/02-samples/03-aws-assistant-mcp-dev/.venv/lib/python3.13/site-packages/prompt_toolkit/shortcuts/prompt.py", line 1229, in prompt_async
+    return await self.app.run_async(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+        set_exception_handler=set_exception_handler, handle_sigint=handle_sigint
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/andypham/Coding/Strands/samples/02-samples/03-aws-assistant-mcp-dev/.venv/lib/python3.13/site-packages/prompt_toolkit/application/application.py", line 651, in run_async
+    assert not self._is_running, "Application is already running."
+           ^^^^^^^^^^^^^^^^^^^^
+AssertionError: Application is already running.
+

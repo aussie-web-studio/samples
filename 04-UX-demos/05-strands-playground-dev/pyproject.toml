@@ -1,0 +1,14 @@
+[project]
+name = "05-strands-playground-dev"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi==0.115.12",
+    "pydantic==2.11.4",
+    "strands-agents>=1.4.0",
+    "strands-agents-tools[mem0-memory]>=0.2.3",
+    "uv>=0.8.8",
+    "uvicorn==0.34.2",
+]
