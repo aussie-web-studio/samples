@@ -20,6 +20,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+# Configure MCP Integration
+from aws_documentation_researcher import aws_documentation_researcher
+
 
 # Configure logging
 logger = logging.getLogger("strands")
@@ -78,6 +81,7 @@ available_tools = {
     'use_llm': use_llm,
     'workflow': workflow,
     'weather_forecast': weather_forecast,
+    'aws_documentation_researcher': aws_documentation_researcher
 }
 
 # Tool descriptions for better user understanding
@@ -109,23 +113,12 @@ tool_descriptions = {
     'use_aws': 'Execute AWS service operations using boto3',
     'use_llm': 'Create isolated agent instances for specific tasks',
     'workflow': 'Advanced workflow orchestration system for parallel AI task execution',
-    'weather_forecast': 'Return a dummy weather for the input city and day, used to showcase inline python tool for Strands'
+    'weather_forecast': 'Return a dummy weather for the input city and day, used to showcase inline python tool for Strands',
+    'aws_documentation_researcher': 'Research AWS documentation to answer user queries with citations and examples'
 }
 
 # Define default selected tools
 tools = [calculator, http_request, use_aws]  # Default tools
-
-# Define tool categories
-tool_categories = {
-    "Scheduling & Time": ["cron", "current_time"],
-    "Files & Editing": ["file_read", "file_write", "editor", "environment"],
-    "AI & Processing": ["generate_image", "python_repl", "retrieve", "think", "workflow", "use_llm"],
-    "System & Shell": ["shell", "stop", "swarm", "use_aws"],
-    "Memory & Data": ["journal", "mem0_memory", "memory", "agent_graph"],
-    "Media & Communication": ["slack", "speak", "nova_reels", "image_reader"],
-    "Utilities": ["calculator", "http_request", "load_tool", "weather_forecast"]
-}
-
 
 # Define classes
 class StrandsPlaygroundAgent(Agent):
@@ -358,27 +351,60 @@ def set_model_settings(request: ModelSettingsRequest):
 # Tools management endpoints
 @app.get("/get_available_tools")
 def get_available_tools():
-    global tools, available_tools, tool_descriptions, tool_categories
-
-    # Build categorized dict from available_tools + the category mapping
-    categorized = {}
-    for category, tool_list in tool_categories.items():
-        categorized[category] = [
-            t for t in tool_list if t in available_tools
+    global tools, available_tools, tool_descriptions
+    
+    tool_groups_config = {
+        "Agent Orchestration & Core": [
+            'agent_graph', 'swarm', 'workflow', 'use_llm', 'think', 'stop', 'load_tool'
+        ],
+        "Memory & Knowledge": [
+            'memory', 'mem0_memory', 'retrieve', 'journal'
+        ],
+        "System, Files & Code": [
+            'shell', 'python_repl', 'file_read', 'file_write', 'editor', 'environment', 'cron'
+        ],
+        "External Services & Content": [
+            'http_request', 'use_aws', 'slack', 'generate_image', 'image_reader', 'nova_reels', 
+            'speak', 'weather_forecast', 'calculator', 'current_time'
+        ],
+        "MCP Integration": [
+            'aws_documentation_researcher'
         ]
+    }
 
-    uncategorized = [
-    t for t in available_tools.keys()
-    if all(t not in tool_list for tool_list in tool_categories.values())
+    tool_groups = []
+    for group_name, tool_names in tool_groups_config.items():
+        group = {
+            "name": group_name,
+            "tools": []
+        }
+        for tool_name in tool_names:
+            if tool_name in available_tools:
+                group["tools"].append({
+                    "name": tool_name,
+                    "description": tool_descriptions.get(tool_name, "")
+                })
+        tool_groups.append(group)
+
+    # Check for any tools not in any group and add them to an "Uncategorized" group
+    all_grouped_tools = {tool for tools in tool_groups_config.values() for tool in tools}
+    uncategorized_tools = [
+        {
+            "name": tool_name,
+            "description": tool_descriptions.get(tool_name, "")
+        }
+        for tool_name in available_tools if tool_name not in all_grouped_tools
     ]
-    if uncategorized:
-        categorized["Uncategorized"] = uncategorized
+
+    if uncategorized_tools:
+        tool_groups.append({
+            "name": "Uncategorized",
+            "tools": uncategorized_tools
+        })
 
     return {
-        #"available_tools": list(available_tools.keys()),
-        "available_tools": categorized,  # now grouped by categories
-        "selected_tools": [tool.__name__.split('.')[-1] for tool in tools],
-        "tool_descriptions": tool_descriptions
+        "tool_groups": tool_groups,
+        "selected_tools": [tool.__name__.split('.')[-1] for tool in tools]
     }
 
 @app.post("/update_tools")

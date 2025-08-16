@@ -4,11 +4,6 @@ A web-based interactive playground for experimenting with the Strands SDK, allow
 
 ![Strands Playground Screenshot](./images/main_page_screenshot.png)
 
-## Quick local run
-
-cd app
-uv run uvicorn main:app --workers 2 --host 0.0.0.0 --port 8003
-
 ## Overview
 
 This project provides a playground environment for developers to experiment with the Strands Agents framework. The playground allows you to:
