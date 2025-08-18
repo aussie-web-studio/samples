@@ -286,7 +286,7 @@ input:disabled {
 
 .message {
     margin-bottom: 15px;
-    padding: 10px 15px;
+    padding: 15px 20px;
     border-radius: 10px;
     max-width: 80%;
     word-wrap: break-word;

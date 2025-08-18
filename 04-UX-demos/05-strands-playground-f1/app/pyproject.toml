@@ -6,7 +6,9 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi==0.115.12",
+    "graphviz>=0.21",
     "pydantic==2.11.4",
+    "sarif-om>=1.0.4",
     "strands-agents>=1.4.0",
     "strands-agents-tools[mem0-memory]>=0.2.3",
     "uv>=0.8.11",

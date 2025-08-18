@@ -163,7 +163,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 messageDiv.className = `message ${msg.role === 'user' ? 'user-message' : 'bot-message'}`;
                 
                 const responseText = msg.content[0].text;
-                messageDiv.textContent = responseText;
+                if (msg.role === 'assistant') {
+                    messageDiv.innerHTML = marked.parse(responseText);
+                } else {
+                    messageDiv.textContent = responseText;
+                }
                 
                 chatMessages.appendChild(messageDiv);
             }
@@ -227,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             botMessageDiv.className = 'message bot-message';
             
             const responseText = data.messages.content[0].text;
-            botMessageDiv.textContent = responseText;
+            botMessageDiv.innerHTML = marked.parse(responseText);
             
             chatMessages.appendChild(botMessageDiv);
             

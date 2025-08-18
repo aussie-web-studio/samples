@@ -22,7 +22,7 @@ from pydantic import BaseModel
 
 # Configure MCP Integration
 from aws_documentation_researcher import aws_documentation_researcher
-
+from aws_diagram_drawer import aws_diagram_drawer
 
 # Configure logging
 logger = logging.getLogger("strands")
@@ -81,7 +81,8 @@ available_tools = {
     'use_llm': use_llm,
     'workflow': workflow,
     'weather_forecast': weather_forecast,
-    'aws_documentation_researcher': aws_documentation_researcher
+    'aws_documentation_researcher': aws_documentation_researcher,
+    'aws_diagram_drawer': aws_diagram_drawer
 }
 
 # Tool descriptions for better user understanding
@@ -114,7 +115,8 @@ tool_descriptions = {
     'use_llm': 'Create isolated agent instances for specific tasks',
     'workflow': 'Advanced workflow orchestration system for parallel AI task execution',
     'weather_forecast': 'Return a dummy weather for the input city and day, used to showcase inline python tool for Strands',
-    'aws_documentation_researcher': 'Research AWS documentation to answer user queries with citations and examples'
+    'aws_documentation_researcher': 'Research AWS documentation to answer user queries with citations and examples',
+    'aws_diagram_drawer': 'Create AWS architecture diagrams based on user queries and AWS documentation'
 }
 
 # Define default selected tools
@@ -368,7 +370,7 @@ def get_available_tools():
             'speak', 'weather_forecast', 'calculator', 'current_time'
         ],
         "MCP Integration": [
-            'aws_documentation_researcher'
+            'aws_documentation_researcher', 'aws_diagram_drawer'
         ]
     }
 
