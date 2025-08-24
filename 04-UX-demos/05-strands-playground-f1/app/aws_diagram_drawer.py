@@ -4,6 +4,12 @@ from strands.tools.mcp import MCPClient
 from strands_tools import file_write
 from strands.models import BedrockModel
 import sys
+
+# import the environment variable for MCP model
+import os
+mcp_model = os.getenv("mcp_model", "us.anthropic.claude-3-7-sonnet-20250219-v1:0")
+mcp_region = os.getenv("mcp_region", "us-west-2")
+
 @tool
 def aws_diagram_drawer(query: str) -> str:
     """
@@ -18,7 +24,7 @@ def aws_diagram_drawer(query: str) -> str:
 
     formatted_query = f"Analyze and respond to this question: {query}"
     
-    bedrock_model = BedrockModel(model_id="us.anthropic.claude-3-7-sonnet-20250219-v1:0",region_name="us-west-2")
+    bedrock_model = BedrockModel(model_id=mcp_model,region_name=mcp_region)
     response = str()
 
     try:

@@ -84,13 +84,19 @@ body {
     border-radius: 4px;
 }
 
-#setUserId {
+#setUserId, #summarizeButton, #deleteHistoryButton {
     padding: 5px 10px;
     background-color: #ff9900;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+}
+
+#summarizeButton:disabled, #deleteHistoryButton:disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
 }
 
 .system-prompt-container {

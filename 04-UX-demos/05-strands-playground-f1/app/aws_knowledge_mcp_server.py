@@ -10,7 +10,7 @@ mcp_model = os.getenv("mcp_model", "us.anthropic.claude-3-7-sonnet-20250219-v1:0
 mcp_region = os.getenv("mcp_region", "us-west-2")
 
 @tool
-def aws_documentation_researcher(query: str) -> str:
+def aws_knowledge_mcp_server(query: str) -> str:
     """
     Process and respond AWS related queries.
 
@@ -27,17 +27,23 @@ def aws_documentation_researcher(query: str) -> str:
     response = str()
 
     try:
-        documentation_mcp_server = MCPClient(
+        aws_knowledge_mcp_server = MCPClient(
             lambda: stdio_client(
                 StdioServerParameters(
-                    command="uvx", args=["awslabs.aws-documentation-mcp-server@latest"], env={"AWS_DOCUMENTATION_PARTITION": "aws"}
+                    command="uvx", 
+                    args=[
+                        "mcp-proxy",
+                        "--transport",
+                        "streamablehttp",
+                        "https://knowledge-mcp.global.api.aws"
+                    ]
                 )
             )
         )
 
-        with documentation_mcp_server:
+        with aws_knowledge_mcp_server:
 
-            tools = documentation_mcp_server.list_tools_sync() + [file_write]
+            tools = aws_knowledge_mcp_server.list_tools_sync() + [file_write]
 
             # Create the research agent with specific capabilities
             research_agent = Agent(
@@ -73,4 +79,4 @@ def aws_documentation_researcher(query: str) -> str:
 
 
 if __name__ == "__main__":
-    aws_documentation_researcher("What is Amazon Bedrock")
+    aws_knowledge_mcp_server("What is Amazon Bedrock")

@@ -23,6 +23,8 @@ from pydantic import BaseModel
 # Configure MCP Integration
 from aws_documentation_researcher import aws_documentation_researcher
 from aws_diagram_drawer import aws_diagram_drawer
+from aws_knowledge_mcp_server import aws_knowledge_mcp_server
+from aws_data_processing_mcp_server import aws_data_processing_mcp_server
 
 # Configure logging
 logger = logging.getLogger("strands")
@@ -82,7 +84,9 @@ available_tools = {
     'workflow': workflow,
     'weather_forecast': weather_forecast,
     'aws_documentation_researcher': aws_documentation_researcher,
-    'aws_diagram_drawer': aws_diagram_drawer
+    'aws_diagram_drawer': aws_diagram_drawer,
+    'aws_knowledge_mcp_server': aws_knowledge_mcp_server,
+    'aws_data_processing_mcp_server': aws_data_processing_mcp_server
 }
 
 # Tool descriptions for better user understanding
@@ -116,7 +120,9 @@ tool_descriptions = {
     'workflow': 'Advanced workflow orchestration system for parallel AI task execution',
     'weather_forecast': 'Return a dummy weather for the input city and day, used to showcase inline python tool for Strands',
     'aws_documentation_researcher': 'Research AWS documentation to answer user queries with citations and examples',
-    'aws_diagram_drawer': 'Create AWS architecture diagrams based on user queries and AWS documentation'
+    'aws_diagram_drawer': 'Create AWS architecture diagrams based on user queries and AWS documentation',
+    'aws_knowledge_mcp_server': 'Proxy to AWS Knowledge MCP server for accessing AWS knowledge base',
+    'aws_data_processing_mcp_server': 'Proxy to AWS Data Processing MCP server for comprehensive data processing tools and real-time pipeline visibility'
 }
 
 # Define default selected tools
@@ -131,6 +137,7 @@ class StrandsPlaygroundAgent(Agent):
 
         # load previous messages if any
         messages = self.restore_agent_state(user_id)
+        
         super().__init__(system_prompt=system_prompt, 
                          model=model,
                          tools=tools,  # Use the global tools list
@@ -208,6 +215,9 @@ class PromptRequest(BaseModel):
     prompt: str
     userId: str
 
+class UserIdRequest(BaseModel):
+    userId: str
+
 class SystemPromptRequest(BaseModel):
     systemPrompt: str
     
@@ -280,6 +290,84 @@ def get_agent_response(request: PromptRequest):
     except Exception as e:
         logger.error(f"Error processing agent response: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error processing agent response: {str(e)}")
+
+@app.post("/cleanup_session")
+def cleanup_session(request: UserIdRequest):
+    try:
+        agent = StrandsPlaygroundAgent(
+            model=BEDROCK_MODEL,
+            system_prompt=SYSTEM_PROMPT,
+            user_id=request.userId
+        )
+        
+        # Summarize the conversation
+        summary_prompt = "Summarize the following conversation, keeping the key points and context:"
+        logger.debug(f"MESSAGES CLEANUP: {agent.messages}")
+        
+        conversation_parts = []
+        for msg in agent.messages:
+            content_parts = []
+            for content in msg.get('content', []):
+                if 'text' in content:
+                    content_parts.append(content['text'])
+                elif 'toolUse' in content:
+                    content_parts.append(f"[Tool use: {content['toolUse']['name']}]")
+                elif 'toolResult' in content:
+                    content_parts.append("[Tool result]")
+            conversation_parts.append(f"{msg['role']}: {' '.join(content_parts)}")
+
+        conversation_text = "\n".join(conversation_parts)
+        summary_prompt += f"\n\n{conversation_text}"
+        
+        # Create a temporary agent to get the summary
+        summary_agent = Agent(
+            system_prompt="You are an expert in summarizing conversations.",
+            model=BEDROCK_MODEL,
+            tools=[],
+            load_tools_from_directory=False
+        )
+        summary_result = summary_agent(summary_prompt)
+        summary_text = summary_result.message['content'][0]['text']
+
+        # Replace messages with summary
+        agent.messages = [
+            {
+                "role": "user",
+                "content": [{"text": "Please provide a summary of our conversation so far."}]
+            },
+            {
+                "role": "assistant",
+                "content": [{"text": f"This is a summary of the previous conversation:\n{summary_text}"}]
+            }
+        ]
+        
+        agent.save_agent_state(request.userId)
+        logger.info(f"Session cleaned up and summarized for user: {request.userId}")
+        
+        return {"messages": agent.messages}
+    except Exception as e:
+        logger.error(f"Error cleaning up session: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error cleaning up session: {str(e)}")
+
+@app.post("/delete_history")
+def delete_history(request: UserIdRequest):
+    try:
+        agent = StrandsPlaygroundAgent(
+            model=BEDROCK_MODEL,
+            system_prompt=SYSTEM_PROMPT,
+            user_id=request.userId
+        )
+        
+        # Clear messages
+        agent.messages = []
+        
+        agent.save_agent_state(request.userId)
+        logger.info(f"Session history deleted for user: {request.userId}")
+        
+        return {"messages": agent.messages}
+    except Exception as e:
+        logger.error(f"Error deleting session history: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error deleting session history: {str(e)}")
 
 # System prompt endpoints
 @app.get("/system_prompt")
@@ -370,7 +458,7 @@ def get_available_tools():
             'speak', 'weather_forecast', 'calculator', 'current_time'
         ],
         "MCP Integration": [
-            'aws_documentation_researcher', 'aws_diagram_drawer'
+            'aws_documentation_researcher', 'aws_diagram_drawer', 'aws_knowledge_mcp_server', 'aws_data_processing_mcp_server'
         ]
     }
 

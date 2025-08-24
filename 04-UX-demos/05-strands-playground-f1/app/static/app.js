@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendButton = document.getElementById('sendButton');
     const userIdInput = document.getElementById('userId');
     const setUserIdButton = document.getElementById('setUserId');
+    const summarizeButton = document.getElementById('summarizeButton');
+    const deleteHistoryButton = document.getElementById('deleteHistoryButton');
     const systemPromptInput = document.getElementById('systemPrompt');
     const setSystemPromptButton = document.getElementById('setSystemPrompt');
     const modelIdInput = document.getElementById('modelId');
@@ -19,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_BASE_URL = '';
     const GET_CONVERSATIONS_ENDPOINT = `${API_BASE_URL}/get_conversations`;
     const CS_AGENT_ENDPOINT = `${API_BASE_URL}/strandsplayground_agent`;
+    const CLEANUP_SESSION_ENDPOINT = `${API_BASE_URL}/cleanup_session`;
+    const DELETE_HISTORY_ENDPOINT = `${API_BASE_URL}/delete_history`;
     const SYSTEM_PROMPT_ENDPOINT = `${API_BASE_URL}/system_prompt`;
     const MODEL_SETTINGS_ENDPOINT = `${API_BASE_URL}/model_settings`;
     
@@ -46,8 +50,76 @@ document.addEventListener('DOMContentLoaded', () => {
         if (newUserId) {
             userId = newUserId;
             loadConversation();
+            summarizeButton.disabled = false;
+            deleteHistoryButton.disabled = false;
         } else {
             showError('Please enter a valid User ID');
+        }
+    });
+
+    summarizeButton.addEventListener('click', async () => {
+        if (isProcessing) return;
+
+        isProcessing = true;
+        chatMessages.innerHTML = '<div class="loading"></div>';
+
+        try {
+            const response = await fetch(CLEANUP_SESSION_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: userId
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            displayConversation(data.messages);
+            showSuccess('Session summarized successfully');
+        } catch (error) {
+            console.error('Error summarizing session:', error);
+            showError('Failed to summarize session. Please try again.');
+        } finally {
+            isProcessing = false;
+        }
+    });
+
+    deleteHistoryButton.addEventListener('click', async () => {
+        if (isProcessing) return;
+
+        if (window.confirm('Are you sure you want to delete the entire conversation history?')) {
+            isProcessing = true;
+            chatMessages.innerHTML = '<div class="loading"></div>';
+
+            try {
+                const response = await fetch(DELETE_HISTORY_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: userId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayConversation(data.messages);
+                showSuccess('Conversation history deleted successfully');
+            } catch (error) {
+                console.error('Error deleting history:', error);
+                showError('Failed to delete history. Please try again.');
+            } finally {
+                isProcessing = false;
+            }
         }
     });
     

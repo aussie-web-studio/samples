@@ -10,9 +10,9 @@ mcp_model = os.getenv("mcp_model", "us.anthropic.claude-3-7-sonnet-20250219-v1:0
 mcp_region = os.getenv("mcp_region", "us-west-2")
 
 @tool
-def aws_documentation_researcher(query: str) -> str:
+def aws_data_processing_mcp_server(query: str) -> str:
     """
-    Process and respond AWS related queries.
+    Process and respond AWS data processing related queries.
 
     Args:
         query: The user's question
@@ -27,34 +27,38 @@ def aws_documentation_researcher(query: str) -> str:
     response = str()
 
     try:
-        documentation_mcp_server = MCPClient(
+        aws_data_processing_mcp_server = MCPClient(
             lambda: stdio_client(
                 StdioServerParameters(
-                    command="uvx", args=["awslabs.aws-documentation-mcp-server@latest"], env={"AWS_DOCUMENTATION_PARTITION": "aws"}
+                    command="uvx", 
+                    args=[
+                        "awslabs.aws-dataprocessing-mcp-server@latest",
+                        "--allow-write",
+                    ],
+                    env={"AWS_REGION": mcp_region}
                 )
             )
         )
 
-        with documentation_mcp_server:
+        with aws_data_processing_mcp_server:
 
-            tools = documentation_mcp_server.list_tools_sync() + [file_write]
+            tools = aws_data_processing_mcp_server.list_tools_sync() + [file_write]
 
             # Create the research agent with specific capabilities
             research_agent = Agent(
                 model=bedrock_model,
-                system_prompt="""You are a thorough AWS researcher specialized in finding accurate 
-                information online. For each question:
-                
+                system_prompt="""
+                You are a thorough AWS researcher specialized in comprehensive data processing tools and real-time pipeline visibility across AWS Glue and Amazon EMR-EC2. For each question:
                 1. Determine what information you need
-                2. Search the AWS Documentation using documenttation mcp server for reliable information
+                2. Search the AWS Documentation using data processing mcp server for reliable information
                 3. Extract key information and cite your sources
                 4. Store important findings in memory for future reference
                 5. Synthesize what you've found into a clear, comprehensive answer
-                
+
                 When researching, focus only on AWS documentation. Always provide citations 
                 for the information you find.
                 
-                Finally output your response to a file into output folder under current directory with nicely html format.
+                Finally output your response to a file into output folder under current directory with nicely html format if required.
                 """,
                 tools=tools,
             )
@@ -73,4 +77,4 @@ def aws_documentation_researcher(query: str) -> str:
 
 
 if __name__ == "__main__":
-    aws_documentation_researcher("What is Amazon Bedrock")
+    aws_data_processing_mcp_server("How many databases are there in AWS Glue?")
