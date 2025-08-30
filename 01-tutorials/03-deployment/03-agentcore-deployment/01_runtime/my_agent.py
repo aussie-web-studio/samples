@@ -3,13 +3,9 @@ from strands import Agent
 from strands.models.bedrock import BedrockModel
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
-
-# Construct the path to the .env file in the parent directory
-env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
-
-# Load the environment variables from the specified path
-load_dotenv(dotenv_path=env_path)
+load_dotenv(Path(__file__).parent.parent / '.env')
 
 # Get the model and region from environment variables or set defaults
 model = os.getenv("model", "anthropic.claude-3-5-sonnet-20241022-v2:0")
