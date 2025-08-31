@@ -4,3 +4,6 @@ watchdog
 jsonschema
 mcp>=1.6.0
 retrying
+opentelemetry-instrumentation==0.57b0
+opentelemetry-semantic-conventions==0.57b0
+aws-opentelemetry-distro>=0.10.1
