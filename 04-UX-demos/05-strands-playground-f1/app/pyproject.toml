@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "bedrock-agentcore-starter-toolkit>=0.1.9",
     "fastapi==0.115.12",
     "graphviz>=0.21",
     "pydantic==2.11.4",

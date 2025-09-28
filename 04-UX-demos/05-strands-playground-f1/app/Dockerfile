@@ -15,6 +15,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy code
 COPY main.py .
 COPY static/ static/
+COPY aws_documentation_researcher.py .
+COPY aws_diagram_drawer.py .
+COPY aws_knowledge_mcp_server.py .
+COPY aws_data_processing_mcp_server.py .
+COPY agentcore_gateway_mcp_server.py .
 
 # Expose the port the app runs on
 EXPOSE 8003

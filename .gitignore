@@ -182,3 +182,4 @@ cython_debug/
 # virtual environment
 .*
 .*/
+gateway_info.json

@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  strands-playground:
+    build: .
+    ports:
+      - "8003:8003"
+    environment:
+      - AWS_PROFILE=${AWS_PROFILE:-default}
+    volumes:
+      - ~/.aws/credentials:/home/appuser/.aws/credentials:ro
+      - ~/.aws/config:/home/appuser/.aws/config:ro

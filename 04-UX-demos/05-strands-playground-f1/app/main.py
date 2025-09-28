@@ -25,6 +25,40 @@ from aws_documentation_researcher import aws_documentation_researcher
 from aws_diagram_drawer import aws_diagram_drawer
 from aws_knowledge_mcp_server import aws_knowledge_mcp_server
 from aws_data_processing_mcp_server import aws_data_processing_mcp_server
+from agentcore_gateway_mcp_server import agentcore_gateway_mcp_server, gateway_tools, get_gateway_available_tools
+
+def get_gateway_tool_descriptions():
+    """Get descriptions with actual available tools for each gateway."""
+    descriptions = {}
+    for tool_name in gateway_tools.keys():
+        # Extract gateway_id from tool name properly
+        gateway_id_part = tool_name.replace('gateway_', '', 1)
+        # Convert underscores back to hyphens for the actual gateway_id
+        gateway_id = gateway_id_part.replace('_', '-')
+        try:
+            available_tools_list = get_gateway_available_tools(gateway_id)
+            
+            # Extract clean tool names from TestGatewayTarget prefixed tools
+            clean_tools = []
+            for tool in available_tools_list:
+                if 'TestGatewayTarget' in tool and '___' in tool:
+                    # Extract the actual tool name after the prefix
+                    clean_name = tool.split('___')[-1]
+                    clean_tools.append(clean_name)
+                elif 'TestGatewayTarget' not in tool:
+                    # Keep tools that don't have the TestGatewayTarget prefix
+                    clean_tools.append(tool)
+            
+            if clean_tools:
+                tools_str = ', '.join(clean_tools[:5])  # Show first 5 tools
+                if len(clean_tools) > 5:
+                    tools_str += f' and {len(clean_tools) - 5} more'
+                descriptions[tool_name] = f'Gateway {gateway_id} with tools: {tools_str}'
+            else:
+                descriptions[tool_name] = f'Gateway {gateway_id} (no tools configured)'
+        except Exception as e:
+            descriptions[tool_name] = f'Gateway {gateway_id} (connection error)'
+    return descriptions
 
 # Configure logging
 logger = logging.getLogger("strands")
@@ -86,7 +120,8 @@ available_tools = {
     'aws_documentation_researcher': aws_documentation_researcher,
     'aws_diagram_drawer': aws_diagram_drawer,
     'aws_knowledge_mcp_server': aws_knowledge_mcp_server,
-    'aws_data_processing_mcp_server': aws_data_processing_mcp_server
+    'aws_data_processing_mcp_server': aws_data_processing_mcp_server,
+    **gateway_tools
 }
 
 # Tool descriptions for better user understanding
@@ -122,7 +157,8 @@ tool_descriptions = {
     'aws_documentation_researcher': 'Research AWS documentation to answer user queries with citations and examples',
     'aws_diagram_drawer': 'Create AWS architecture diagrams based on user queries and AWS documentation',
     'aws_knowledge_mcp_server': 'Proxy to AWS Knowledge MCP server for accessing AWS knowledge base',
-    'aws_data_processing_mcp_server': 'Proxy to AWS Data Processing MCP server for comprehensive data processing tools and real-time pipeline visibility'
+    'aws_data_processing_mcp_server': 'Proxy to AWS Data Processing MCP server for comprehensive data processing tools and real-time pipeline visibility',
+    **get_gateway_tool_descriptions()
 }
 
 # Define default selected tools
@@ -459,7 +495,7 @@ def get_available_tools():
         ],
         "MCP Integration": [
             'aws_documentation_researcher', 'aws_diagram_drawer', 'aws_knowledge_mcp_server', 'aws_data_processing_mcp_server'
-        ]
+        ] + list(gateway_tools.keys())
     }
 
     tool_groups = []

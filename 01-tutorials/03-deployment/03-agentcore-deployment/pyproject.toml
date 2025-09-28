@@ -13,4 +13,5 @@ dependencies = [
     "strands-agents>=1.5.0",
     "strands-agents-tools>=0.2.5",
     "streamlit>=1.28.0",
+    "tavily-python>=0.7.11",
 ]
